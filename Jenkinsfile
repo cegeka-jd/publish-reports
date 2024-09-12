@@ -27,7 +27,7 @@ pipeline {
         stage('Test') {
             steps {
                 dir("${env.WORKSPACE}"){
-                    sh('''
+                    sh('''\
                         venv/bin/coverage run -m pytest -v test_*.py \
                             --junitxml=pytest_junit.xml
                     ''')
@@ -50,14 +50,14 @@ pipeline {
         always {
             dir("${env.WORKSPACE}"){
                 sh 'venv/bin/coverage xml'
+                sh 'ls -al' // List files to verify coverage.xml is present
             }
 
             // Publish test results
             junit allowEmptyResults: true, testResults: '**/pytest_junit.xml'
-            junit allowEmptyResults: true, testResults: '**/pylint_junit.xml'
 
-            // Use the Coverage Plugin to publish coverage reports
-            recordCoverage tools: [cobertura(pattern: '**/coverage.xml')]
+            // Use the Cobertura plugin to publish coverage reports
+            cobertura coberturaReportFile: '**/coverage.xml'
         }
     }
 }
